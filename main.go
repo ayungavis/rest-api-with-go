@@ -13,8 +13,8 @@ import (
 func main() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/users/register", controllers.CreateUser).Methods("POST")
-	router.HandleFunc("/api/users/login", controllers.Authenticate).Methods("POST")
+	router.HandleFunc("/api/auth/register", controllers.CreateUser).Methods("POST")
+	router.HandleFunc("/api/auth/login", controllers.Authenticate).Methods("POST")
 
 	router.Use(app.UserAuthentication)
 

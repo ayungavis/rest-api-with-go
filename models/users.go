@@ -4,22 +4,27 @@ import (
 	"os"
 	u "simple-rest-api/utils"
 	"strings"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Token struct {
-	UserID uint
+	UserID uuid.UUID
 	jwt.StandardClaims
 }
 
 type User struct {
-	gorm.Model
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Token    string `json:"token";sql:"-"`
+	ID        uuid.UUID  `gorm:"type:uuid;primary_key;";json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
+	Email     string     `json:"email"`
+	Password  string     `json:"password"`
+	Token     string     `json:"token";sql:"-"`
 }
 
 // Validate incoming user details
@@ -58,9 +63,9 @@ func (user *User) Create() map[string]interface{} {
 
 	GetDB().Create(user)
 
-	if user.ID <= 0 {
-		return u.Message(false, "Failed to create account, connection error")
-	}
+	// if user.ID ==  {
+	// 	return u.Message(false, "Failed to create account, connection error")
+	// }
 
 	// Create new JWT token
 	tk := &Token{UserID: user.ID}
@@ -112,4 +117,13 @@ func GetUser(u uint) *User {
 
 	user.Password = ""
 	return user
+}
+
+func (user *User) BeforeCreate(scope *gorm.Scope) error {
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		return err
+	}
+
+	return scope.SetColumn("ID", uuid)
 }
